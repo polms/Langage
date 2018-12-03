@@ -1,0 +1,441 @@
+/**
+ * JJTree template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = true;
+  MULTI = true;
+  NODE_EXTENDS="MyNode";
+  //DEBUG_PARSER = true;
+  //DEBUG_LOOKAHEAD = true;
+}
+
+PARSER_BEGIN(Lang)
+package grammaireV3;
+import java.util.HashMap;
+import java.util.ArrayList;
+
+public class Lang
+{ 
+  public static void main(String args [])
+  {
+    ASTStart n = null;
+    try
+    {
+      Lang l = new Lang(new java.io.FileReader("D:\\eclipse-workspace\\Langage\\src\\grammaireV3\\exemple.lang"));
+      n = Lang.Start();
+      n.dump("--");
+      n.run();
+      System.out.println("Thank you.");
+    }
+    catch (Exception e)
+    {
+      System.out.println("Oops." + n.symbols);
+      e.printStackTrace();
+    }
+  }
+}
+
+PARSER_END(Lang)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : /* OPERATORS */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTIPLY : "*" >
+| < DIVIDE : "/" >
+| < OR : "or" >
+| < AND : "and" >
+| < NOT : "not" >
+| < SUPTO : ">" >
+| < INFTO : "<" >
+| < SUPEQUALTO : ">=" >
+| < INFEQUALTO : "<=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "<>" >
+}
+
+TOKEN :
+{
+  < ALGO : "algo" >
+| < DEBUT : "begin" >
+| < VAR : "var" >
+| < CONST : "const" >
+| < END : "end" >
+| < IF: "if" >
+| < THEN: "then" >
+| < ELSE: "else" >
+| < ENDIF: "endif" >
+| < WHILE: "while" >
+| < DO: "do" >
+| < ENDWHILE: "endwhile" >
+| < FOR: "for" >
+| < SWITCH: "switch" >
+| < PROCEDURE: "procedure" >
+| < FUNCTION: "function" >
+| < RETURN: "return" >
+| < TRUE : "true" >
+| < FALSE : "false" >
+}
+
+TOKEN :
+{
+  < NOMBRE : (< CHIFFRE >)+("."(< CHIFFRE >)+)* >
+| < CHIFFRE : [ "0"-"9" ] >
+| < TYPE : ("int" | "boolean" | "string" | "float") >
+| < IDENT : < LETTRE > (< LETTRE > | < CHIFFRE >)* >
+| < LETTRE : (< LETTREMIN > | <LETTREMAJ >) >
+| < #LETTREMIN : [ "a"-"z" ] >
+| < #LETTREMAJ : [ "A"-"Z" ] >
+| < STRING : ("\"" (< LETTRE > | " ")* "\"") >
+}
+
+
+
+ASTStart Start() :
+{Token t;}
+{
+  < ALGO > t = < IDENT > declarations() < DEBUT > instructions() < END > sroutines()
+  {
+    jjtThis.value = t.image;
+    return jjtThis;
+  }
+}
+
+void declarations():
+{ }
+{
+	declarationVariables()
+	declarationConstantes()
+}
+
+
+void declarationVariables() #void:
+{ }
+{
+	< VAR >
+	(  
+	  declarationVariable()
+	)+
+| { }
+}
+
+void declarationVariable() #variable:
+{ }
+{
+	typage() ";"
+}
+
+void declarationConstantes() #void:
+{ }
+{
+	< CONST >
+	(
+	  declarationConstante()
+	)+
+| {}
+}
+
+void declarationConstante() #constant:
+{ }
+{
+  typage() "<-" vconst() ";"
+}
+
+void typage() #void:
+{ Token t; }
+{
+	t = < TYPE > { jjtThis.value = t.image; }#type
+	t = < IDENT > { jjtThis.value = t.image; }#ident
+}
+
+void instructions():
+{ }
+{
+	(
+	  instruction()
+	)*
+}
+
+void instruction() #void:
+{ }
+{
+	(
+	  LOOKAHEAD(2) 
+	  affectation()
+	| appelProcedure()
+	) ";"
+| structures()
+}
+
+void affectation() #affect:
+{ Token t; }
+{
+  LOOKAHEAD(2) 
+	t = < IDENT > { jjtThis.value = t.image; }#ident ":=" expLog() #valueLog
+| 	t = < IDENT > { jjtThis.value = t.image; }#ident "<-" laffectation()
+}
+
+void laffectation() #value:
+{ Token t; }
+{ 
+	expArith()
+| t = < STRING > { jjtThis.value = t.image; }}
+
+void appelProcedure() #callProc:
+{ Token t; }
+{
+  t = < IDENT > { jjtThis.value = t.image; } "(" arguments() ")"
+}
+void appelFonction() #callFunct:
+{ Token t; }
+{
+  t = < IDENT > { jjtThis.value = t.image; } "(" arguments() ")"
+}
+
+void arguments() #void:
+{ }
+{
+	(
+	  argument()
+	  (
+	    "," argument()
+	  )*
+	)
+| { }
+	
+}
+
+void argument() #argument:
+{ Token t; }
+{
+  t = < STRING > { jjtThis.value = t.image; }
+| LOOKAHEAD(2)  t = < IDENT > { jjtThis.value = t.image; }#ident
+| expArith()
+}
+
+boolean bool() #bool:
+{ Token t; }
+{
+  t = < TRUE > { jjtThis.value = t.image; return Boolean.parseBoolean(t.image);}
+| t = < FALSE >{ jjtThis.value = t.image; return Boolean.parseBoolean(t.image);}
+}
+
+void vconst() #vconst:
+{ Token t; boolean b;}
+{
+  b = bool() { jjtThis.value = b; }
+| t = < STRING > { jjtThis.value = t.image; }
+| t = < NOMBRE > { jjtThis.value = t.image; }
+}
+
+void structures() #void:
+{ }
+{
+	sif()
+| swhile()
+/*| sfor()
+| sswitch()*/
+}
+
+void sif() #sif:
+{ }
+{
+	< IF > "(" expLog() ")" < THEN > instructions()
+	(
+	  < ELSE > instructions()
+	| { }
+	)
+	< ENDIF >
+}
+
+void swhile() #swhile:
+{ }
+{
+	< WHILE > "(" expLog() ")" < DO > instructions() <  ENDWHILE >
+}
+
+
+void sroutines():
+{ }
+{
+(    function()
+| procedure()
+)*
+}
+
+void procedure():
+{ Token t; }
+{
+	< PROCEDURE > t = < IDENT > { jjtThis.value = t.image; }
+	"(" params()  ")"
+	declarations()
+	< DEBUT >
+	instructions()
+	< END >
+}
+
+void function():
+{ Token t; }
+{
+	< FUNCTION > t = < TYPE > { jjtThis.value = t.image; }#return_type
+	t = < IDENT > { jjtThis.value = t.image; }
+	"(" params()  ")"
+	declarations()
+	< DEBUT >
+	instructions()
+	< RETURN > t = < IDENT >{ jjtThis.value = t.image; }#ident ";"
+	< END >
+}
+
+void params():
+{ }
+{
+  param()
+  (    "," param()
+  )*
+| { }
+}
+
+void param():
+{ }
+{
+	typage()
+}
+
+//===============================
+// EXPRESSIONS LOGIQUES
+//===============================
+
+void expLog() #void:
+{}
+{
+  termLog()
+  (
+    (
+      < OR > termLog() #or(2)
+    )
+  )*
+}
+
+void termLog() #void:
+{}
+{
+  unaryLog()
+  (
+    (
+      < AND > unaryLog() #and(2)
+    )
+  )*
+}
+
+void unaryLog() #void:
+{}
+{
+  < NOT > elementLog() #not(1)
+| elementLog()
+}
+  
+void elementLog() #void:
+{}
+{
+  LOOKAHEAD(3) 
+  booleen()
+| comparaison()
+}
+
+void comparaison() #comp:
+{String t;}
+{
+  expArith()
+  t = opeComp() { jjtThis.value = t; }
+  expArith()
+}
+
+String opeComp() #void:
+{}
+{
+  < EQUAL >
+  {
+    return Lang.getToken(0).image;
+  }
+| < NOTEQUAL >
+  {
+    return Lang.getToken(0).image;
+  }
+| < SUPTO >
+  {
+    return Lang.getToken(0).image;
+  }
+| < INFTO >
+  {
+    return Lang.getToken(0).image;
+  }
+| < SUPEQUALTO >
+  {
+    return Lang.getToken(0).image;
+  }
+| < INFEQUALTO >
+  {
+    return Lang.getToken(0).image;
+  }
+}
+
+void booleen() #void:
+{}
+{
+  bool() 
+| appelFonction()
+|  "("  expLog() ")" #bool
+}
+
+
+//===============================
+// EXPRESSIONS ARITHMETIQUES
+//===============================
+
+void expArith() #void:
+{}
+{
+  term()
+  (
+      < PLUS > term() #plus(2)
+    | < MINUS > term() #minus(2)
+  )*
+}
+
+void term() #void:
+{}
+{
+  unary()
+  (
+      < MULTIPLY > unary() #mul(2)
+    | < DIVIDE > unary() #div(2)
+    )*
+}
+
+void unary() #void:
+{}
+{
+  < MINUS > element()  #min(1)
+| element()
+}
+
+void element() #void:
+{ Token t; }
+{
+  t = < NOMBRE > { jjtThis.value = t.image; }#arith
+| "(" expArith() ")" #arith
+| LOOKAHEAD(2)
+   appelFonction()
+| t = < IDENT > { jjtThis.value = t.image; }#ident
+}
+

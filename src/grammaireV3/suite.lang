@@ -1,0 +1,19 @@
+algo suite
+var
+  int i;
+  int k;
+  float u;
+begin
+  print("Saisir le nombre de termes voulu");
+  k <- read();
+  
+  u <- 3.0;
+  print("u", u);
+  
+  i <- 1;
+  while (i < k) do
+    u <- 0.5 * u + 2;
+    print("u",u);
+    i <- i + 1;
+  endwhile
+end

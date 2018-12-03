@@ -1,0 +1,73 @@
+algo exemple
+var
+  int in;
+  int fact;
+  int big;
+const
+  int limit <- 16;
+begin
+  bonjour();
+  print("Entrer un nombre");
+  in <- read();
+  
+  while (in > limit) do
+    print("Le nombre ", in, "est trop grand la limite est ", limit);
+    in <- read();
+  endwhile
+
+  fact <- factorielle(in);
+  print("la factorielle de ", in, " est ", fact);
+  
+  print("Affiche les termes d une suite geometrique");
+  printsuite(9, 5.2);
+  
+  big <- max(5, 10);
+  debug();
+end
+
+function int factorielle(int a)
+var
+  int ret;
+  int temp;
+begin
+  if (a <= 0) then
+    ret <- 1;
+  else
+    temp <- a - 1;
+    ret <- a * factorielle(temp);
+  endif
+  return ret;
+end
+
+function int max(int a, int b)
+var
+  int ret;
+  boolean temp;
+begin
+  if (not a < b) then
+    ret <- a;
+  else
+    ret <- b;
+  endif
+  return ret;
+end
+
+procedure printsuite(int k, float u)
+var
+  int i;
+begin
+  print("u", u);  
+  i <- 1;
+  while (i < k) do
+    u <- 0.5 * u + 2;
+    print("u",u);
+    i <- i + 1;
+  endwhile
+end
+
+procedure bonjour()
+const
+  string text <- "Bonjour";
+begin
+  print(text);
+end

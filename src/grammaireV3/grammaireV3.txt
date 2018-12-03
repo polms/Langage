@@ -1,0 +1,52 @@
+
+S -> 'algo' <Ident> <Declarations> 'begin' <Instructions> 'end' <Routines>
+Ident -> <Lettre> (<Lettre> | <Chiffre>)*
+Lettre -> 'A' | 'a' | 'B' | ... | 'z'
+Nombre -> <Chiffre>+
+Chiffre -> '0' | '1' | ... | '9'
+
+Declarations -> <DeclarationVariables> <DeclarationConstantes>
+DeclarationVariables -> 'var' <DeclarationVariable>+ | E
+DeclarationVariable ->  <Typage> ';'
+DeclarationConstantes -> 'const' <DeclarationConstante>+ | E
+DeclarationConstante -> <Typage> '<-' <Const>
+
+Const -> (<Nombre> | <String> | <ValBool>)
+
+Typage ->  <Type> <Ident>
+Type -> 'int' | 'boolean' | 'string' | 'float'
+String -> '"' (<Lettre> | ' ')* '"'
+ValBool -> 'True' | 'False'
+
+ExpArith -> <Term> ('+' | '-') <Term> | <Term>
+Term -> <Unary> ('*' | '/') <Unary> | <Unary>
+Unary -> '-' <Element> | <Element>
+Element -> <Nombre> | '(' <ExpArith> ')' | <Ident> | <AppelFonction>
+
+ExpLog -> <TermLog> ('or' <TermLog>)*
+TermLog -> <UnaryLog> ('and' <UnaryLog>)*
+UnaryLog -> '-' <ElementLog> | <ElementLog>
+ElementLog -> <Booleen> | <Comparaison>
+Comparaison -> <ExpArith> <OpeComp> <ExpArith>
+OpeComp -> '=' | '<' | '>' | '>=' | '<=' | '<>'
+Booleen -> <ValBool> | <Ident>  | '('<ExpLog>')' | <AppelFonction>
+
+Instructions -> <Instruction>*
+Instruction -> (<Affectation> ';' | <Structures> | <AppelProcedure> ';') 
+Affectation -> <Ident> ':=' <ExpLog> | <Ident> '<-' <LAffectation>
+LAffectation -> <ExpArith> | <String> 
+
+AppelFonction -> <Ident> '(' <Arguments> ')'
+AppelProcedure -> <Ident> '(' <Arguments> ')'
+Arguments -> <Argument> (',' <Argument>)* | E
+Argument -> <String> | <ExpLog> | <ExpArith>
+
+Structures -> <If> | <While> | <For> | <Switch>
+If -> 'if' '(' <ExpLog> ')' 'then' <Instructions> (E | 'else' <Instructions>) 'endif'
+While -> 'while' '(' <ExpLog> ')' 'do' <Instructions> 'endwhile'
+For -> 'for' '(' <Ident> 'from' <ExpArith> 'to' <ExpArith> 'step' <ExpArith> ')' 'do' <Instructions> 'endfor'
+Switch -> 'case' '(' <Ident> ')' ('is' <Const> 'do' <Instructions> 'break')* 'otherwise' <Instructions> 'endcase'
+
+Routines -> <Fonction> | <Procedure>
+Procedure -> 'procedure' <Ident> '(' (<Typage> (',' <Typage>)* | E) ')' <Declarations> 'begin' <Instructions> 'end'
+Fonction -> 'function' <Type> <Ident> '(' (<Typage> (',' <Typage>)* | E) ')' 'var' <Type> 'ret;' <DeclarationVariable> <DeclarationConstantes> 'begin' <Instructions> 'return ret;'  'end'

@@ -1,0 +1,72 @@
+algo test 
+var
+  int a;
+  boolean q;
+  boolean dt;
+  int c;
+  string s;
+const
+  int b <- 4;
+begin
+  c <- max(4,3);
+  print(c);
+  
+  c <- factorielle(5);
+  print("fact cinq", c);
+
+  truc(3, 4.6);
+  truc(5, 6.7);
+  a <- 0;
+  while (a < 4) do
+    print(a);
+    a <- a + 1;
+  endwhile
+  
+  s <- "test";
+  print(s);
+  print("Hello");
+  a <- 5 + 5;
+  q := true and not false;
+  if (a <> b) then
+    print(a, q);
+  endif
+  debug();
+end
+
+function int max(int a, int b)
+var
+  int ret;
+begin
+  if (a > b) then
+    ret <- a;
+  else
+    ret <- b;
+  endif
+  return ret;
+end
+
+function int factorielle(int a)
+var
+  int ret;
+  int temp;
+begin
+  if (a <= 0) then
+    ret <- 1;
+  else
+    temp <- a - 1;
+    ret <- a * factorielle(temp);
+  endif
+  return ret;
+end
+
+procedure truc(int k, float b)
+var
+  int a;
+begin
+  print("truc", k, b);
+  k <- k + 1;
+  a <- 4;
+  print("Hello", a);
+  a <- 3;
+  print(a);
+end
